@@ -1,0 +1,62 @@
+Memòria Puzle 1:
+
+Connexió RPi a internet:
+
+Per connectar la Raspberry Pi a internet, primer vaig instal·lar el sistema operatiu amb el Raspi Imager a la microSD que va connectada a la Raspberry Pi. A la configuració de l’Imager venen algunes opcions, com per exemple connectar-se de forma predeterminada a una red Wifi. Per tenir connexió a internet, em vaig connectar a la connexió que fa servir el meu mòbil com a punt d’accés compartit.
+
+Una vegada fet això, vaig ser capaç de tenir una connexió directa a la terminal fent servir Putty, però no vaig trobar la manera d’activar l’VNC desde la consola ni de saber la IP de la Raspberry Pi. Per solucionar aquest problema, vaig connectar la Raspberry Pi directament a un monitor fent servir un HDMI, i desde l’escriptori de la pròpia Raspberry Pi, activar el VNC i trobar la IP va ser molt més fàcil. El VNC el vaig activar a la configuració del dispositiu i la IP a la pestanya del Wifi que es troba a la cantonada d’adalt a la dreta a l’escriptori.
+
+Una vegada amb el VNC activat i sabent la IP de la Raspberry Pi al punt Wifi (el meu mòbil) per connectar-me a la Raspberry Pi vaig connectar el portàtil a la mateixa red que la Raspberry Pi (el meu mòbil també), i vaig fer servir la IP que vaig trobar connectant la Raspberry Pi a un monitor al programa VNC. Una vegada fet això, vaig tenir connexió directa a la Raspberry Pi.
+
+Configuració/instal·lació RPi
+
+El nostre grup vam escollir fer els primers puzles amb ruby, per tant, necessitava tenir ruby instal·lat a la Raspberry Pi.
+
+Per fer-ho, vaig fer servir aquest comandament a la terminal:
+
+ sudo apt-get install ruby
+
+I amb això, vaig instal·lar ruby. Per comprovar que funcionava, vaig fer un codi molt bàsic on a la pantalla de la terminal sortia “Hola mundo!” si s’executava. 
+
+Un cop tenint ruby instal·lat, em calia instal·lar les llibreries necessàries per fer funcionar el dispositiu NFC (ACR122u). Aquestes són libnfc i libfreefare. 
+Per instal·lar-los vaig seguir les instruccions de github:
+
+https://github.com/nfc-tools/libnfc
+https://github.com/nfc-tools/libfreefare
+
+Vaig tenir algun problema a l’hora d’instal·lar el libnfc ja que no tenia les dependències necessàries per compilar i instal·lar el paquet (comanda make install i configure). Per instal·lar-lo, vaig fer servir aquesta comanda:
+
+sudo apt install autoconf automake libtool
+
+Una vegada instal·lades les dos llibreries, calia instal·lar també el ruby-nfc, el qual vaig instal·lar fent servir aquesta comanda:
+
+gem install ruby-nfc
+
+Amb això, totes les llibreries necessàries per fer el primer puzle estaven instal·lades.
+
+Codi ruby
+
+require 'ruby-nfc'
+class Rfid
+
+    @@readers = NFC::Reader.all
+
+    def read_uid
+
+        @@readers[0].poll(Mifare::Classic::Tag) do |tag|
+
+            begin
+
+                uid = tag.uid_hex.upcase
+                return uid
+            end
+        end
+    end
+end
+
+if __FILE__  == $0
+    rf = Rfid.new
+    puts "Apropa la targeta"
+    uid= rf.read_uid
+    puts uid
+end
