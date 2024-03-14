@@ -7,13 +7,10 @@ class Rfid
 
         @@readers[0].poll(Mifare::Classic::Tag) do |tag|
 
-            begin
-
                 uid = tag.uid_hex.upcase
                 return uid
-            end
         end
-    end
+     end
 end
 
 if __FILE__  == $0
